@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Open Positions Intelligence — Photon</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1A1A1A;color:#FDF7ED;font-family:'Segoe UI',system-ui,sans-serif;height:100vh;overflow:hidden}
+#root{height:100vh;display:flex;flex-direction:column}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:rgba(236,187,105,0.2);border-radius:4px}
+textarea:focus{border-color:#ECBB69!important;outline:none}
+textarea::placeholder{color:rgba(253,247,237,0.35)}
+select option{background:#2A2A2A;color:#FDF7ED}
+@keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:0.4}30%{transform:translateY(-5px);opacity:1}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useRef, useEffect, useMemo } = React;
+
+const LOGO_SRC = "data:image/png;base64,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";
+
+const ALL_DATA = [{"account":"CitiGroup","agingBucket":"60+ days","priority":"P1","buHead":"Abhijit Tushar Sen","open":125},{"account":"CitiGroup","agingBucket":"0-15 days","priority":"P0","buHead":"Abhijit Tushar Sen","open":36},{"account":"CitiGroup","agingBucket":"30-60 days","priority":"P0","buHead":"Abhijit Tushar Sen","open":19},{"account":"CitiGroup","agingBucket":"60+ days","priority":"P0","buHead":"Abhijit Tushar Sen","open":17},{"account":"CitiGroup","agingBucket":"30-60 days","priority":"P1","buHead":"Abhijit Tushar Sen","open":12},{"account":"CitiGroup","agingBucket":"16-30 days","priority":"P0","buHead":"Abhijit Tushar Sen","open":3},{"account":"CitiGroup","agingBucket":"16-30 days","priority":"P1","buHead":"Abhijit Tushar Sen","open":2},{"account":"SocGen","agingBucket":"16-30 days","priority":"P0","buHead":"Abhijit Tushar Sen","open":38},{"account":"SocGen","agingBucket":"30-60 days","priority":"P0","buHead":"Abhijit Tushar Sen","open":26},{"account":"SocGen","agingBucket":"60+ days","priority":"P1","buHead":"Abhijit Tushar Sen","open":17},{"account":"SocGen","agingBucket":"60+ days","priority":"P0","buHead":"Abhijit Tushar Sen","open":4},{"account":"SocGen","agingBucket":"0-15 days","priority":"P0","buHead":"Abhijit Tushar Sen","open":8},{"account":"Alter Domus","agingBucket":"60+ days","priority":"P1","buHead":"Abhijit Tushar Sen","open":22},{"account":"Alter Domus","agingBucket":"30-60 days","priority":"P1","buHead":"Abhijit Tushar Sen","open":4},{"account":"Alter Domus","agingBucket":"0-15 days","priority":"P0","buHead":"Abhijit Tushar Sen","open":2},{"account":"Alter Domus","agingBucket":"16-30 days","priority":"P1","buHead":"Abhijit Tushar Sen","open":2},{"account":"Alter Domus","agingBucket":"30-60 days","priority":"P0","buHead":"Abhijit Tushar Sen","open":1},{"account":"Alter Domus","agingBucket":"60+ days","priority":"P0","buHead":"Abhijit Tushar Sen","open":1},{"account":"JPMorgan Chase Bank N.A.","agingBucket":"60+ days","priority":"P1","buHead":"Abhijit Tushar Sen","open":14},{"account":"JPMorgan Chase Bank N.A.","agingBucket":"0-15 days","priority":"P1","buHead":"Abhijit Tushar Sen","open":11},{"account":"JPMorgan Chase Bank N.A.","agingBucket":"60+ days","priority":"P0","buHead":"Abhijit Tushar Sen","open":3},{"account":"Focus Brands","agingBucket":"16-30 days","priority":"P0","buHead":"Abhijit Tushar Sen","open":5},{"account":"Focus Brands","agingBucket":"30-60 days","priority":"P1","buHead":"Abhijit Tushar Sen","open":2},{"account":"Focus Brands","agingBucket":"60+ days","priority":"P1","buHead":"Abhijit Tushar Sen","open":1},{"account":"Focus Brands","agingBucket":"16-30 days","priority":"P1","buHead":"Abhijit Tushar Sen","open":1},{"account":"Focus Brands","agingBucket":"0-15 days","priority":"P1","buHead":"Abhijit Tushar Sen","open":1},{"account":"UnitedLex Corporation","agingBucket":"30-60 days","priority":"P0","buHead":"Abhijit Tushar Sen","open":3},{"account":"Pret A Manger","agingBucket":"30-60 days","priority":"P0","buHead":"Abhijit Tushar Sen","open":1},{"account":"BJ's Wholesale Club","agingBucket":"0-15 days","priority":"P0","buHead":"Abhijit Tushar Sen","open":1},{"account":"Credit One Bank","agingBucket":"60+ days","priority":"P1","buHead":"Anantha Vedachalam","open":67},{"account":"Credit One Bank","agingBucket":"0-15 days","priority":"P0","buHead":"Anantha Vedachalam","open":3},{"account":"Credit One Bank","agingBucket":"16-30 days","priority":"P0","buHead":"Anantha Vedachalam","open":1},{"account":"Credit One Bank","agingBucket":"30-60 days","priority":"P0","buHead":"Anantha Vedachalam","open":1},{"account":"Fidelity Technology Group Inc.","agingBucket":"60+ days","priority":"P1","buHead":"Anantha Vedachalam","open":31},{"account":"Fidelity Technology Group Inc.","agingBucket":"60+ days","priority":"P0","buHead":"Anantha Vedachalam","open":16},{"account":"Fidelity Technology Group Inc.","agingBucket":"0-15 days","priority":"P0","buHead":"Anantha Vedachalam","open":10},{"account":"Fidelity Technology Group Inc.","agingBucket":"30-60 days","priority":"P0","buHead":"Anantha Vedachalam","open":9},{"account":"Fidelity Technology Group Inc.","agingBucket":"30-60 days","priority":"P1","buHead":"Anantha Vedachalam","open":2},{"account":"Fidelity Technology Group Inc.","agingBucket":"16-30 days","priority":"P0","buHead":"Anantha Vedachalam","open":1},{"account":"O'Reilly Auto Parts","agingBucket":"30-60 days","priority":"P0","buHead":"Anantha Vedachalam","open":20},{"account":"O'Reilly Auto Parts","agingBucket":"16-30 days","priority":"P0","buHead":"Anantha Vedachalam","open":12},{"account":"O'Reilly Auto Parts","agingBucket":"0-15 days","priority":"P0","buHead":"Anantha Vedachalam","open":12},{"account":"O'Reilly Auto Parts","agingBucket":"16-30 days","priority":"P1","buHead":"Anantha Vedachalam","open":2},{"account":"O'Reilly Auto Parts","agingBucket":"60+ days","priority":"P0","buHead":"Anantha Vedachalam","open":1},{"account":"O'Reilly Auto Parts","agingBucket":"60+ days","priority":"P1","buHead":"Anantha Vedachalam","open":1},{"account":"Fidelity Business Services India","agingBucket":"30-60 days","priority":"P0","buHead":"Anantha Vedachalam","open":17},{"account":"Fidelity Business Services India","agingBucket":"16-30 days","priority":"P0","buHead":"Anantha Vedachalam","open":7},{"account":"Fidelity Business Services India","agingBucket":"60+ days","priority":"P1","buHead":"Anantha Vedachalam","open":7},{"account":"Fidelity Business Services India","agingBucket":"60+ days","priority":"P0","buHead":"Anantha Vedachalam","open":5},{"account":"Fidelity Business Services India","agingBucket":"0-15 days","priority":"P0","buHead":"Anantha Vedachalam","open":1},{"account":"Williams Sonoma Inc.","agingBucket":"60+ days","priority":"P1","buHead":"Anantha Vedachalam","open":35},{"account":"Williams Sonoma Inc.","agingBucket":"30-60 days","priority":"P1","buHead":"Anantha Vedachalam","open":1},{"account":"SRS Distribution Inc.","agingBucket":"60+ days","priority":"P1","buHead":"Anantha Vedachalam","open":32},{"account":"SRS Distribution Inc.","agingBucket":"16-30 days","priority":"P1","buHead":"Anantha Vedachalam","open":1},{"account":"CVS Caremark Corporation","agingBucket":"60+ days","priority":"P1","buHead":"Anantha Vedachalam","open":18},{"account":"CVS Caremark Corporation","agingBucket":"30-60 days","priority":"P0","buHead":"Anantha Vedachalam","open":4},{"account":"CVS Caremark Corporation","agingBucket":"16-30 days","priority":"P1","buHead":"Anantha Vedachalam","open":3},{"account":"CVS Caremark Corporation","agingBucket":"16-30 days","priority":"P0","buHead":"Anantha Vedachalam","open":2},{"account":"CVS Caremark Corporation","agingBucket":"30-60 days","priority":"P1","buHead":"Anantha Vedachalam","open":1},{"account":"NAB","agingBucket":"60+ days","priority":"P1","buHead":"Anantha Vedachalam","open":20},{"account":"NAB","agingBucket":"30-60 days","priority":"P1","buHead":"Anantha Vedachalam","open":3},{"account":"NAB","agingBucket":"0-15 days","priority":"P0","buHead":"Anantha Vedachalam","open":2},{"account":"Fiserv Inc.","agingBucket":"60+ days","priority":"P1","buHead":"Anantha Vedachalam","open":9},{"account":"Fiserv Inc.","agingBucket":"30-60 days","priority":"P1","buHead":"Anantha Vedachalam","open":4},{"account":"Fiserv Inc.","agingBucket":"16-30 days","priority":"P0","buHead":"Anantha Vedachalam","open":2},{"account":"Fiserv Inc.","agingBucket":"0-15 days","priority":"P0","buHead":"Anantha Vedachalam","open":2},{"account":"Fiserv Inc.","agingBucket":"30-60 days","priority":"P0","buHead":"Anantha Vedachalam","open":1},{"account":"Fiserv Inc.","agingBucket":"60+ days","priority":"P0","buHead":"Anantha Vedachalam","open":1},{"account":"LOreal","agingBucket":"30-60 days","priority":"P1","buHead":"Anantha Vedachalam","open":6},{"account":"LOreal","agingBucket":"0-15 days","priority":"P1","buHead":"Anantha Vedachalam","open":5},{"account":"LOreal","agingBucket":"16-30 days","priority":"P1","buHead":"Anantha Vedachalam","open":3},{"account":"LOreal","agingBucket":"16-30 days","priority":"P0","buHead":"Anantha Vedachalam","open":1},{"account":"LOreal","agingBucket":"60+ days","priority":"P1","buHead":"Anantha Vedachalam","open":2},{"account":"Dutch Bros","agingBucket":"0-15 days","priority":"P0","buHead":"Anantha Vedachalam","open":5},{"account":"Dutch Bros","agingBucket":"16-30 days","priority":"P0","buHead":"Anantha Vedachalam","open":3},{"account":"Dutch Bros","agingBucket":"0-15 days","priority":"P1","buHead":"Anantha Vedachalam","open":4},{"account":"Dutch Bros","agingBucket":"16-30 days","priority":"P1","buHead":"Anantha Vedachalam","open":2},{"account":"Photon","agingBucket":"60+ days","priority":"P1","buHead":"Anantha Vedachalam","open":11},{"account":"Photon","agingBucket":"30-60 days","priority":"P1","buHead":"Anantha Vedachalam","open":1},{"account":"Columbia Sportswear","agingBucket":"60+ days","priority":"P1","buHead":"Anantha Vedachalam","open":10},{"account":"Toyota Motor Credit Corporation","agingBucket":"30-60 days","priority":"P1","buHead":"Anantha Vedachalam","open":4},{"account":"Toyota Motor Credit Corporation","agingBucket":"60+ days","priority":"P1","buHead":"Anantha Vedachalam","open":3},{"account":"Toyota Motor Credit Corporation","agingBucket":"0-15 days","priority":"P0","buHead":"Anantha Vedachalam","open":2},{"account":"WBA","agingBucket":"0-15 days","priority":"P0","buHead":"Anantha Vedachalam","open":6},{"account":"WBA","agingBucket":"16-30 days","priority":"P0","buHead":"Anantha Vedachalam","open":1},{"account":"WBA","agingBucket":"16-30 days","priority":"P1","buHead":"Anantha Vedachalam","open":1},{"account":"Bank of America","agingBucket":"60+ days","priority":"P0","buHead":"Anantha Vedachalam","open":4},{"account":"Bank of America","agingBucket":"60+ days","priority":"P1","buHead":"Anantha Vedachalam","open":4},{"account":"Apollo - Yahoo!","agingBucket":"60+ days","priority":"P1","buHead":"Anantha Vedachalam","open":3},{"account":"Apollo - Yahoo!","agingBucket":"30-60 days","priority":"P1","buHead":"Anantha Vedachalam","open":3},{"account":"Apollo - Yahoo!","agingBucket":"0-15 days","priority":"P0","buHead":"Anantha Vedachalam","open":2},{"account":"Colgate Palmolive","agingBucket":"0-15 days","priority":"P0","buHead":"Anantha Vedachalam","open":5},{"account":"Colgate Palmolive","agingBucket":"16-30 days","priority":"P0","buHead":"Anantha Vedachalam","open":1},{"account":"Colgate Palmolive","agingBucket":"0-15 days","priority":"P1","buHead":"Anantha Vedachalam","open":1},{"account":"Alaska Airlines Inc","agingBucket":"30-60 days","priority":"P1","buHead":"Anantha Vedachalam","open":5},{"account":"Colowrap","agingBucket":"0-15 days","priority":"P1","buHead":"Anantha Vedachalam","open":5},{"account":"Frontier Communications","agingBucket":"60+ days","priority":"P1","buHead":"Anantha Vedachalam","open":4},{"account":"Frontier Communications","agingBucket":"0-15 days","priority":"P1","buHead":"Anantha Vedachalam","open":1},{"account":"Sallie Mae","agingBucket":"0-15 days","priority":"P0","buHead":"Anantha Vedachalam","open":3},{"account":"Sallie Mae","agingBucket":"0-15 days","priority":"P1","buHead":"Anantha Vedachalam","open":2},{"account":"Boots UK Ltd","agingBucket":"0-15 days","priority":"P0","buHead":"Anantha Vedachalam","open":4},{"account":"Green Thumb Industries GTI","agingBucket":"0-15 days","priority":"P0","buHead":"Anantha Vedachalam","open":3},{"account":"Green Thumb Industries GTI","agingBucket":"0-15 days","priority":"P1","buHead":"Anantha Vedachalam","open":1},{"account":"GM Financial","agingBucket":"30-60 days","priority":"P0","buHead":"Anantha Vedachalam","open":2},{"account":"GM Financial","agingBucket":"0-15 days","priority":"P0","buHead":"Anantha Vedachalam","open":1},{"account":"Coty","agingBucket":"0-15 days","priority":"P0","buHead":"Anantha Vedachalam","open":2},{"account":"KeyBank National Association","agingBucket":"16-30 days","priority":"P0","buHead":"Anantha Vedachalam","open":2},{"account":"IG Group","agingBucket":"60+ days","priority":"P1","buHead":"Anantha Vedachalam","open":1},{"account":"IG Group","agingBucket":"30-60 days","priority":"P1","buHead":"Anantha Vedachalam","open":1},{"account":"Sentara Healthcare","agingBucket":"60+ days","priority":"P1","buHead":"Anantha Vedachalam","open":1},{"account":"Groundworks","agingBucket":"60+ days","priority":"P1","buHead":"Anantha Vedachalam","open":1},{"account":"KOHLER CO.","agingBucket":"60+ days","priority":"P1","buHead":"Anantha Vedachalam","open":1},{"account":"Microchip","agingBucket":"16-30 days","priority":"P1","buHead":"Anantha Vedachalam","open":1},{"account":"Labcorp","agingBucket":"30-60 days","priority":"P1","buHead":"Anantha Vedachalam","open":1},{"account":"Darden","agingBucket":"0-15 days","priority":"P1","buHead":"Anantha Vedachalam","open":1},{"account":"Gap Inc.","agingBucket":"0-15 days","priority":"P1","buHead":"Anantha Vedachalam","open":1}];
+
+const BU_HEADS=["All","Abhijit Tushar Sen","Anantha Vedachalam"];
+const PRIORITIES=["All","P0","P1"];
+const AGING_BUCKETS=["All","0-15 days","16-30 days","30-60 days","60+ days"];
+const GOLD="#ECBB69",C1="#1A1A1A",C2="#2A2A2A",C3="#333",CREAM="#FDF7ED",TEAL="#5BA4AF",MUTED="rgba(253,247,237,0.55)",BORDER="rgba(236,187,105,0.2)";
+
+const SUGGESTIONS=[
+  "Which accounts have the most critical P0 reqs aging past 60 days?",
+  "Give me an executive summary of open positions by BU",
+  "What is our overall P0 fill rate risk this quarter?",
+  "Which accounts need immediate escalation based on aging?",
+  "Compare P0 vs P1 distribution across all accounts",
+  "What is the revenue risk from unfilled 60+ day reqs?",
+  "Which accounts have zero P0 reqs — healthy or stalled?",
+  "Top 5 accounts by total open headcount",
+  "Which aging bucket has the highest concentration of reqs?",
+  "Draft a weekly recruiting status update for leadership",
+];
+
+function FilterSelect({label,value,options,onChange}){
+  return(
+    React.createElement("div",{style:{display:"flex",alignItems:"center",gap:6}},
+      React.createElement("span",{style:{fontSize:10,color:MUTED,textTransform:"uppercase",letterSpacing:"0.06em",whiteSpace:"nowrap"}},label),
+      React.createElement("select",{value,onChange:e=>onChange(e.target.value),style:{background:C3,border:"1px solid "+(value==="All"?"rgba(236,187,105,0.3)":GOLD),borderRadius:6,padding:"4px 26px 4px 10px",color:value==="All"?CREAM:GOLD,fontSize:12,fontWeight:value==="All"?400:700,outline:"none",cursor:"pointer",appearance:"none",WebkitAppearance:"none",backgroundImage:"url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23ECBB69'/%3E%3C/svg%3E\")",backgroundRepeat:"no-repeat",backgroundPosition:"right 8px center",minWidth:80}},
+        options.map(o=>React.createElement("option",{key:o,value:o,style:{background:C2,color:CREAM}},o))
+      )
+    )
+  );
+}
+
+function formatResponse(text){
+  text=text.replace(/\*\*/g,"");
+  const lines=text.split("\n"),elements=[];
+  let key=0,i=0;
+  while(i<lines.length){
+    const line=lines[i];
+    if(line.trim().startsWith("|")&&line.trim().endsWith("|")){
+      const tl=[];
+      while(i<lines.length&&lines[i].trim().startsWith("|")){if(!lines[i].includes("---"))tl.push(lines[i]);i++;}
+      if(tl.length>0){
+        const headers=tl[0].trim().slice(1,-1).split("|").map(h=>h.trim());
+        elements.push(React.createElement("div",{key:key++,style:{overflowX:"auto",margin:"8px 0"}},
+          React.createElement("table",{style:{width:"100%",borderCollapse:"collapse",fontSize:13}},
+            React.createElement("thead",null,React.createElement("tr",null,headers.map((h,j)=>React.createElement("th",{key:j,style:{textAlign:"left",padding:"6px 10px",background:"rgba(236,187,105,0.12)",color:GOLD,fontSize:11,textTransform:"uppercase",letterSpacing:"0.05em",borderBottom:"1px solid "+BORDER}},h)))),
+            React.createElement("tbody",null,tl.slice(1).map((row,ri)=>{const cells=row.trim().slice(1,-1).split("|").map(c=>c.trim());return React.createElement("tr",{key:ri},cells.map((c,ci)=>React.createElement("td",{key:ci,style:{padding:"6px 10px",borderBottom:"1px solid rgba(255,255,255,0.05)",color:CREAM}},c)));}))
+          )
+        ));
+      }
+      continue;
+    }
+    if(line.trim().startsWith("- ")||line.trim().startsWith("• "))
+      elements.push(React.createElement("li",{key:key++,style:{marginLeft:16,marginBottom:3,color:CREAM,fontSize:14}},line.replace(/^[-\u2022]\s+/,"")));
+    else if(line.trim()==="")elements.push(React.createElement("div",{key:key++,style:{height:6}}));
+    else elements.push(React.createElement("p",{key:key++,style:{margin:"2px 0",lineHeight:1.6,color:CREAM,fontSize:14}},line));
+    i++;
+  }
+  return elements;
+}
+
+function App(){
+  const [buHead,setBuHead]=useState("Abhijit Tushar Sen");
+  const [priority,setPriority]=useState("P0");
+  const [aging,setAging]=useState("All");
+  const [messages,setMessages]=useState([]);
+  const [input,setInput]=useState("");
+  const [loading,setLoading]=useState(false);
+  const messagesEndRef=useRef(null);
+  const inputRef=useRef(null);
+  useEffect(()=>{messagesEndRef.current&&messagesEndRef.current.scrollIntoView({behavior:"smooth"});},[messages,loading]);
+
+  const filtered=useMemo(()=>ALL_DATA.filter(r=>(buHead==="All"||r.buHead===buHead)&&(priority==="All"||r.priority===priority)&&(aging==="All"||r.agingBucket===aging)),[buHead,priority,aging]);
+  const stats=useMemo(()=>({total:filtered.reduce((s,r)=>s+r.open,0),accounts:new Set(filtered.map(r=>r.account)).size,p0:filtered.filter(r=>r.priority==="P0").reduce((s,r)=>s+r.open,0),aging60:filtered.filter(r=>r.agingBucket==="60+ days").reduce((s,r)=>s+r.open,0)}),[filtered]);
+  const acctMap=useMemo(()=>{const m={};filtered.forEach(r=>{if(!m[r.account])m[r.account]={total:0,p0:0,b0:0,b1:0,b2:0,b3:0};m[r.account].total+=r.open;if(r.priority==="P0")m[r.account].p0+=r.open;if(r.agingBucket==="0-15 days")m[r.account].b0+=r.open;else if(r.agingBucket==="16-30 days")m[r.account].b1+=r.open;else if(r.agingBucket==="30-60 days")m[r.account].b2+=r.open;else if(r.agingBucket==="60+ days")m[r.account].b3+=r.open;});return Object.entries(m).sort((a,b)=>b[1].total-a[1].total);},[filtered]);
+  const filteredContext=useMemo(()=>{let ctx="FILTERED: BU Head="+buHead+" | Priority="+priority+" | Aging="+aging+"\nTotal="+stats.total+" | Accounts="+stats.accounts+" | P0="+stats.p0+" | 60+days="+stats.aging60+"\n\nACCOUNTS:\n";acctMap.forEach(([acct,d])=>{ctx+="  "+acct+": "+d.total+" total, P0="+d.p0+", 0-15d="+d.b0+", 16-30d="+d.b1+", 30-60d="+d.b2+", 60+d="+d.b3+"\n";});return ctx;},[acctMap,buHead,priority,aging,stats]);
+  const onFilter=(setter)=>(v)=>{setter(v);setMessages([]);};
+
+  const sendMessage=async(text)=>{
+    const q=text||input.trim();if(!q||loading)return;
+    setInput("");
+    const newMsgs=[...messages,{role:"user",content:q}];
+    setMessages(newMsgs);setLoading(true);
+    try{
+      const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,system:"You are a recruiting intelligence assistant for Photon. Answer questions about this filtered open positions data. Be concise and direct. No asterisks. Use plain tables where helpful.\n\n"+filteredContext,messages:newMsgs})});
+      const data=await res.json();
+      setMessages([...newMsgs,{role:"assistant",content:data.content&&data.content[0]?data.content[0].text:"No response."}]);
+    }catch(e){setMessages([...newMsgs,{role:"assistant",content:"Something went wrong."}]);}
+    setLoading(false);if(inputRef.current)inputRef.current.focus();
+  };
+
+  const th={padding:"7px 12px",textAlign:"left",fontSize:11,textTransform:"uppercase",letterSpacing:"0.05em",color:GOLD,borderBottom:"1px solid "+BORDER,background:"rgba(236,187,105,0.08)",whiteSpace:"nowrap"};
+  const totals={total:acctMap.reduce((s,[,d])=>s+d.total,0),p0:acctMap.reduce((s,[,d])=>s+d.p0,0),b0:acctMap.reduce((s,[,d])=>s+d.b0,0),b1:acctMap.reduce((s,[,d])=>s+d.b1,0),b2:acctMap.reduce((s,[,d])=>s+d.b2,0),b3:acctMap.reduce((s,[,d])=>s+d.b3,0)};
+
+  return(
+    React.createElement("div",{style:{display:"flex",flexDirection:"column",height:"100vh",background:C1,color:CREAM,fontFamily:"'Segoe UI',system-ui,sans-serif"}},
+
+      // HEADER
+      React.createElement("div",{style:{background:C2,borderBottom:"1px solid "+BORDER,padding:"10px 20px",display:"flex",alignItems:"center",gap:14,flexShrink:0}},
+        React.createElement("img",{src:LOGO_SRC,alt:"Photon",style:{height:28,width:"auto"}}),
+        React.createElement("div",{style:{width:1,height:24,background:BORDER}}),
+        React.createElement("span",{style:{fontSize:13,color:MUTED,fontWeight:500}},"Open Positions Intelligence"),
+        React.createElement("div",{style:{marginLeft:"auto",background:"rgba(91,164,175,0.15)",border:"1px solid "+TEAL,color:TEAL,fontSize:11,padding:"3px 12px",borderRadius:20,fontWeight:500}},"Live · "+stats.total+" reqs · "+stats.accounts+" accounts")
+      ),
+
+      // FILTERS
+      React.createElement("div",{style:{background:C2,borderBottom:"1px solid "+BORDER,padding:"8px 20px",display:"flex",gap:16,flexShrink:0,alignItems:"center",flexWrap:"wrap"}},
+        React.createElement(FilterSelect,{label:"BU Head",value:buHead,options:BU_HEADS,onChange:onFilter(setBuHead)}),
+        React.createElement(FilterSelect,{label:"Priority",value:priority,options:PRIORITIES,onChange:onFilter(setPriority)}),
+        React.createElement(FilterSelect,{label:"Aging",value:aging,options:AGING_BUCKETS,onChange:onFilter(setAging)}),
+        React.createElement("span",{style:{marginLeft:"auto",fontSize:11,color:MUTED}},"Verified "+new Date().toLocaleDateString()+" · Power BI")
+      ),
+
+      // STATS
+      React.createElement("div",{style:{background:C2,borderBottom:"1px solid "+BORDER,padding:"7px 20px",display:"flex",gap:24,flexShrink:0}},
+        ...[{l:"Total Open",v:stats.total,c:GOLD},{l:"P0",v:stats.p0,c:"#E07050"},{l:"60+ Days",v:stats.aging60,c:"#E09040"},{l:"Accounts",v:stats.accounts,c:TEAL}].map(({l,v,c})=>
+          React.createElement("div",{key:l,style:{display:"flex",flexDirection:"column",gap:1}},
+            React.createElement("span",{style:{fontSize:10,color:MUTED,textTransform:"uppercase",letterSpacing:"0.05em"}},l),
+            React.createElement("span",{style:{fontSize:16,fontWeight:700,color:c}},v)
+          )
+        )
+      ),
+
+      // SCROLLABLE BODY
+      React.createElement("div",{style:{flex:1,overflowY:"auto",display:"flex",flexDirection:"column"}},
+
+        // LOGO + SUGGESTIONS
+        React.createElement("div",{style:{padding:"20px 20px 16px",display:"flex",flexDirection:"column",alignItems:"center",borderBottom:"1px solid "+BORDER}},
+          React.createElement("img",{src:LOGO_SRC,alt:"Photon",style:{height:56,width:"auto",marginBottom:12,opacity:0.85}}),
+          React.createElement("div",{style:{fontSize:12,color:MUTED,marginBottom:12,textAlign:"center"}},(buHead==="All"?"All BU Heads":buHead)+" · "+(priority==="All"?"All Priorities":priority)+" · "+(aging==="All"?"All Aging":aging)),
+          React.createElement("div",{style:{display:"flex",flexWrap:"wrap",gap:8,justifyContent:"center",maxWidth:800}},
+            SUGGESTIONS.map(s=>React.createElement("div",{key:s,onClick:()=>sendMessage(s),style:{background:"rgba(236,187,105,0.08)",border:"1px solid "+BORDER,color:GOLD,fontSize:12,padding:"6px 14px",borderRadius:20,cursor:"pointer",whiteSpace:"nowrap"}},s))
+          )
+        ),
+
+        // TABLE
+        React.createElement("div",{style:{padding:"0 0 8px"}},
+          React.createElement("table",{style:{width:"100%",borderCollapse:"collapse"}},
+            React.createElement("thead",null,
+              React.createElement("tr",null,
+                React.createElement("th",{style:th},"Account"),
+                React.createElement("th",{style:{...th,textAlign:"right"}},"Total"),
+                React.createElement("th",{style:{...th,textAlign:"right"}},"P0"),
+                React.createElement("th",{style:{...th,textAlign:"right"}},"0–15d"),
+                React.createElement("th",{style:{...th,textAlign:"right"}},"16–30d"),
+                React.createElement("th",{style:{...th,textAlign:"right"}},"30–60d"),
+                React.createElement("th",{style:{...th,textAlign:"right",color:"#E09040"}},"60+d ⚑")
+              )
+            ),
+            React.createElement("tbody",null,
+              ...acctMap.map(([acct,d])=>React.createElement("tr",{key:acct},
+                React.createElement("td",{style:{padding:"6px 12px",fontSize:13,borderBottom:"1px solid rgba(255,255,255,0.04)",fontWeight:600,color:CREAM}},acct),
+                React.createElement("td",{style:{padding:"6px 12px",fontSize:13,borderBottom:"1px solid rgba(255,255,255,0.04)",textAlign:"right",fontWeight:700,color:GOLD}},d.total),
+                React.createElement("td",{style:{padding:"6px 12px",fontSize:13,borderBottom:"1px solid rgba(255,255,255,0.04)",textAlign:"right",color:d.p0>0?"#E07050":MUTED,fontWeight:d.p0>0?700:400}},d.p0||"—"),
+                React.createElement("td",{style:{padding:"6px 12px",fontSize:13,borderBottom:"1px solid rgba(255,255,255,0.04)",textAlign:"right",color:d.b0?CREAM:MUTED}},d.b0||"—"),
+                React.createElement("td",{style:{padding:"6px 12px",fontSize:13,borderBottom:"1px solid rgba(255,255,255,0.04)",textAlign:"right",color:d.b1?CREAM:MUTED}},d.b1||"—"),
+                React.createElement("td",{style:{padding:"6px 12px",fontSize:13,borderBottom:"1px solid rgba(255,255,255,0.04)",textAlign:"right",color:d.b2?CREAM:MUTED}},d.b2||"—"),
+                React.createElement("td",{style:{padding:"6px 12px",fontSize:13,borderBottom:"1px solid rgba(255,255,255,0.04)",textAlign:"right",color:d.b3>10?"#E09040":d.b3>0?CREAM:MUTED,fontWeight:d.b3>10?700:400}},d.b3||"—")
+              )),
+              React.createElement("tr",{style:{background:"rgba(236,187,105,0.08)"}},
+                React.createElement("td",{style:{padding:"8px 12px",fontWeight:700,color:GOLD,fontSize:13,borderTop:"1px solid "+BORDER}},"TOTAL"),
+                React.createElement("td",{style:{padding:"8px 12px",textAlign:"right",fontWeight:700,color:GOLD,fontSize:13,borderTop:"1px solid "+BORDER}},totals.total),
+                React.createElement("td",{style:{padding:"8px 12px",textAlign:"right",fontWeight:700,color:"#E07050",fontSize:13,borderTop:"1px solid "+BORDER}},totals.p0),
+                React.createElement("td",{style:{padding:"8px 12px",textAlign:"right",fontWeight:600,color:CREAM,fontSize:13,borderTop:"1px solid "+BORDER}},totals.b0),
+                React.createElement("td",{style:{padding:"8px 12px",textAlign:"right",fontWeight:600,color:CREAM,fontSize:13,borderTop:"1px solid "+BORDER}},totals.b1),
+                React.createElement("td",{style:{padding:"8px 12px",textAlign:"right",fontWeight:600,color:CREAM,fontSize:13,borderTop:"1px solid "+BORDER}},totals.b2),
+                React.createElement("td",{style:{padding:"8px 12px",textAlign:"right",fontWeight:700,color:"#E09040",fontSize:13,borderTop:"1px solid "+BORDER}},totals.b3)
+              )
+            )
+          )
+        ),
+
+        // CHAT MESSAGES
+        messages.length>0&&React.createElement("div",{style:{padding:"12px 20px",display:"flex",flexDirection:"column",gap:12,borderTop:"1px solid "+BORDER}},
+          ...messages.map((msg,i)=>React.createElement("div",{key:i,style:{display:"flex",gap:10,maxWidth:780,alignSelf:msg.role==="user"?"flex-end":"flex-start",flexDirection:msg.role==="user"?"row-reverse":"row"}},
+            React.createElement("div",{style:{width:28,height:28,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,flexShrink:0,marginTop:2,background:msg.role==="user"?GOLD:C3,color:msg.role==="user"?C1:GOLD,border:msg.role==="assistant"?"1px solid "+BORDER:"none"}},msg.role==="user"?"B":"P"),
+            React.createElement("div",{style:{padding:"10px 14px",borderRadius:msg.role==="user"?"12px 12px 2px 12px":"12px 12px 12px 2px",fontSize:14,lineHeight:1.6,maxWidth:"calc(100% - 42px)",background:msg.role==="user"?GOLD:C2,color:msg.role==="user"?C1:CREAM,border:msg.role==="assistant"?"1px solid "+BORDER:"none"}},
+              msg.role==="assistant"?formatResponse(msg.content):msg.content
+            )
+          )),
+          loading&&React.createElement("div",{style:{display:"flex",gap:10,alignSelf:"flex-start"}},
+            React.createElement("div",{style:{width:28,height:28,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",background:C3,color:GOLD,border:"1px solid "+BORDER,fontSize:11,fontWeight:700}},"P"),
+            React.createElement("div",{style:{padding:"10px 14px",borderRadius:"12px 12px 12px 2px",background:C2,border:"1px solid "+BORDER}},
+              React.createElement("div",{style:{display:"flex",gap:4,alignItems:"center",padding:"4px 0"}},
+                ...[0,1,2].map(i=>React.createElement("span",{key:i,style:{width:6,height:6,borderRadius:"50%",background:GOLD,opacity:0.4,display:"inline-block",animation:"bounce 1.2s "+(i*0.2)+"s infinite"}}))
+              )
+            )
+          ),
+          React.createElement("div",{ref:messagesEndRef})
+        )
+      ),
+
+      // INPUT BAR
+      React.createElement("div",{style:{padding:"10px 20px 14px",borderTop:"1px solid "+BORDER,background:C2,flexShrink:0}},
+        React.createElement("div",{style:{display:"flex",gap:8,alignItems:"flex-end"}},
+          React.createElement("textarea",{ref:inputRef,style:{flex:1,background:C3,border:"1px solid rgba(236,187,105,0.25)",borderRadius:10,padding:"9px 13px",color:CREAM,fontSize:14,fontFamily:"inherit",resize:"none",minHeight:40,lineHeight:1.5},value:input,onChange:e=>setInput(e.target.value),onKeyDown:e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();if(!loading)sendMessage();}},placeholder:"Ask about "+(buHead==="All"?"all accounts":buHead.split(" ")[0])+"'s "+(priority==="All"?"reqs":priority+" reqs")+"…",rows:1}),
+          React.createElement("button",{onClick:()=>sendMessage(),disabled:loading,style:{width:40,height:40,borderRadius:10,background:GOLD,border:"none",cursor:loading?"not-allowed":"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,opacity:loading?0.4:1}},
+            React.createElement("svg",{width:18,height:18,viewBox:"0 0 24 24",fill:C1},React.createElement("path",{d:"M2 21l21-9L2 3v7l15 2-15 2v7z"}))
+          )
+        )
+      )
+    )
+  );
+}
+
+ReactDOM.render(React.createElement(App), document.getElementById("root"));
+</script>
+</body>
+</html>
